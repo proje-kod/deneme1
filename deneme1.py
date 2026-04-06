@@ -15,7 +15,12 @@ def veri_yukle():
 def veri_kaydet(data):
     with open(DB_FILE, "w") as f:
         json.dump(data, f)
-
+# Eğer URL sonuna ?mod=ustad eklemezseniz sanatçı panelini göremezsiniz
+query_params = st.query_params
+if query_params.get("mod") == "ustad":
+    rol = "Sanatçı"
+else:
+    rol = "Seyirci"
 # Sayfa Yapılandırması
 st.set_page_config(page_title="Sahne İstek", layout="wide")
 
