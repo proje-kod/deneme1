@@ -69,6 +69,7 @@ if mod == "seyirci":
     # Seyirci ekranı da 5 saniyede bir kontrol etsin ki buton yeşile dönebilsin
     st_autorefresh(interval=5000, key="seyirci_refresh")
     
+    # İSTEK GÖNDER / İSTEK İLETİLDİ BUTONU
     if st.button(btn_text, disabled=(kullanici_istegi is not None)):
         if "secilen_sarki" not in st.session_state or st.session_state.secilen_sarki is None:
             st.error("Lütfen önce bir seçim yapınız!")
@@ -78,6 +79,12 @@ if mod == "seyirci":
             veri_kaydet(data)
             st.rerun()
 
+    # Eğer seyirci zaten bir istek göndermişse bu mesajı görsün
+    if kullanici_istegi:
+        st.warning("LÜTFEN YEŞİL BUTONU BEKLEYİNİZ")
+        st.info(f"Sıradaki isteğiniz: **{kullanici_istegi}**")
+
+    # REPERTUAR LİSTESİ
     repertuar = [f"Şarkı {i}" for i in range(1, 21)]
     st.session_state.secilen_sarki = st.radio("", repertuar, index=None, label_visibility="collapsed")
 
