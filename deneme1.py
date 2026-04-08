@@ -15,22 +15,34 @@ def veri_yukle():
 def veri_kaydet(data):
     with open(DB_FILE, "w") as f: json.dump(data, f)
 
-# Sayfa Genişlik Ayarı (Sanatçı için daraltılabilir yapı)
 st.set_page_config(page_title="Sahne", layout="centered")
 
-# CSS ile butonları ve başlıkları gönderdiğiniz taslağa benzetiyoruz
-st.markdown("""
+# Veriyi en başta yüklüyoruz ki buton rengini belirleyebilelim
+if 'user_id' not in st.session_state:
+    import uuid
+    st.session_state.user_id = str(uuid.uuid4())
+
+data = veri_yukle()
+kullanici_istegi = data["aktif_kullanicilar"].get(st.session_state.user_id)
+
+# DURUMA GÖRE RENK BELİRLEME
+# İstek yoksa: Yeşil (#28a745), İstek varsa: Kırmızı (#dc3545)
+btn_color = "#dc3545" if kullanici_istegi else "#28a745"
+btn_text = "İSTEK GÖNDERİLDİ" if kullanici_istegi else "İSTEK GÖNDER"
+
+st.markdown(f"""
     <style>
-    .stButton>button {
+    .stButton>button {{
         width: 100%;
-        background-color: #FDE992 !important;
-        color: black !important;
+        background-color: {btn_color} !important;
+        color: white !important;
         font-weight: bold !important;
         border: 2px solid #1d3311 !important;
-        height: 50px;
-        font-size: 20px;
-    }
-    .istek-baslik {
+        height: 60px;
+        font-size: 22px;
+        border-radius: 10px;
+    }}
+    .istek-baslik {{
         background-color: #FDE992;
         color: black;
         text-align: center;
@@ -38,27 +50,23 @@ st.markdown("""
         padding: 10px;
         border: 2px solid #1d3311;
         margin-bottom: 10px;
-    }
-    .main { background-color: #314d1c; } /* Arka plan yeşili */
-    div[data-testid="stVerticalBlock"] { gap: 0.5rem; }
+    }}
+    /* Tarayıcı daraltma için ana konteyner boşluklarını sıfırlama */
+    .block-container {{
+        padding-top: 1rem !important;
+        padding-bottom: 0rem !important;
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    }}
     </style>
     """, unsafe_allow_html=True)
 
-if 'user_id' not in st.session_state:
-    import uuid
-    st.session_state.user_id = str(uuid.uuid4())
-
-# URL Parametresi ile Mod Seçimi (?mod=sanatci)
 params = st.query_params
 mod = params.get("mod", "seyirci")
 
 # --- SEYİRCİ EKRANI ---
 if mod == "seyirci":
-    data = veri_yukle()
-    kullanici_istegi = data["aktif_kullanicilar"].get(st.session_state.user_id)
-    
-    # EN ÜSTTEKİ GÖNDER BUTONU (Aynı zamanda başlık görevi görüyor)
-    if st.button("İSTEK GÖNDER", disabled=(kullanici_istegi is not None)):
+    if st.button(btn_text, disabled=(kullanici_istegi is not None)):
         if "secilen_sarki" not in st.session_state or st.session_state.secilen_sarki is None:
             st.error("Lütfen önce bir seçim yapınız!")
         else:
@@ -67,8 +75,7 @@ if mod == "seyirci":
             veri_kaydet(data)
             st.rerun()
 
-    # REPERTUAR LİSTESİ
-    repertuar = [f"Şarkı {i}" for i in range(1, 21)] # Örnek liste
+    repertuar = [f"Şarkı {i}" for i in range(1, 21)]
     st.session_state.secilen_sarki = st.radio("", repertuar, index=None, label_visibility="collapsed")
     
     if kullanici_istegi:
@@ -79,10 +86,8 @@ else:
     st_autorefresh(interval=3000, key="refresh")
     st.markdown('<div class="istek-baslik">İSTEKLER</div>', unsafe_allow_html=True)
     
-    data = veri_yukle()
-    
     for idx, item in enumerate(data["istekler"]):
-        col1, col2 = st.columns([4, 1])
+        col1, col2 = st.columns([4, 1.5])
         col1.write(f"**{item['sarki']}**")
         if col2.button("SİL", key=f"del_{idx}"):
             u_id = item['id']
