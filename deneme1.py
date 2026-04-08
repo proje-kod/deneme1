@@ -114,8 +114,7 @@ if mod == "seyirci":
     repertuar = [f"Şarkı {i}" for i in range(1, 21)] # Burayı kendi listenizle güncelleyebilirsiniz
     st.session_state.secilen_sarki = st.radio("", repertuar, index=None, label_visibility="collapsed")
 
-else:
-else:
+    else:
     # SANATÇI EKRANI
     st_autorefresh(interval=3000, key="sanatci_refresh")
     st.markdown('<div class="istek-baslik">İSTEKLER</div>', unsafe_allow_html=True)
