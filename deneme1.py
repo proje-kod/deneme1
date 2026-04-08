@@ -30,73 +30,46 @@ data = veri_yukle()
 kullanici_istegi = data["aktif_kullanicilar"].get(st.session_state.user_id)
 
 # DURUMA GÖRE RENK VE METİN BELİRLEME
-btn_color = "#dc3545" if kullanici_istegi else "#28a745" # Kırmızı : Yeşil
+btn_color = "#dc3545" if kullanici_istegi else "#28a745"
 btn_text = "İSTEK İLETİLDİ" if kullanici_istegi else "İSTEK GÖNDER"
 
-# --- GENEL CSS ---
+# --- GENEL CSS VE JAVASCRIPT ---
 st.markdown(f"""
     <style>
-    .block-container {{
-        padding-top: 3rem !important; 
-        padding-bottom: 0rem !important;
-    }}
+    .block-container {{ padding-top: 3rem !important; }}
     .stButton>button {{
-        width: 100%;
-        background-color: {btn_color} !important;
-        color: white !important;
-        font-weight: bold !important;
-        border: 2px solid #1d3311 !important;
-        height: 60px;
-        font-size: 22px;
-        border-radius: 10px;
-        margin-top: 10px;
+        width: 100%; background-color: {btn_color} !important;
+        color: white !important; font-weight: bold !important;
+        height: 60px; font-size: 22px; border-radius: 10px;
     }}
     .istek-baslik {{
-        background-color: #FDE992;
-        color: black;
-        text-align: center;
-        font-weight: bold;
-        padding: 10px;
-        border: 2px solid #1d3311;
-        margin-bottom: 20px;
+        background-color: #FDE992; color: black; text-align: center;
+        font-weight: bold; padding: 10px; border: 2px solid #1d3311; margin-bottom: 20px;
     }}
-    /* Sanatçı Paneli İçin Özel Ayarlar */
-    .sarki-metni {{
+    .sarki-satiri {{
+        padding: 12px;
+        margin-bottom: 5px;
+        background-color: #1d3311;
+        border-radius: 5px;
+        color: #FDE992;
+        font-size: 18px;
+        cursor: pointer;
+        user-select: none; /* Metnin seçilmesini engeller, tıklamayı kolaylaştırır */
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        font-size: 16px;
-        color: #FDE992;
-        padding-top: 5px;
-        display: block;
     }}
-    div[data-testid="column"] button {{
-        background-color: #dc3545 !important;
-        color: white !important;
-        border: 1px solid white !important;
-        height: 35px !important;
-        min-width: 60px !important;
-        font-size: 12px !important;
-        font-weight: bold !important;
-        line-height: 1 !important;
-        padding: 0px 5px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }}
+    .sarki-satiri:hover {{ background-color: #2a4a18; }}
     </style>
     """, unsafe_allow_html=True)
 
-# URL parametresinden mod kontrolü
 params = st.query_params
 mod = params.get("mod", "seyirci")
 
-# --- MODLARA GÖRE EKRANLAR ---
+# --- SEYİRCİ EKRANI ---
 if mod == "seyirci":
-    # Seyirci ekranı 5 saniyede bir yenilenir (Sanatçı silince butonun yeşile dönmesi için)
     st_autorefresh(interval=5000, key="seyirci_refresh")
     
-    # Gönder Butonu
     if st.button(btn_text, disabled=(kullanici_istegi is not None)):
         if "secilen_sarki" not in st.session_state or st.session_state.secilen_sarki is None:
             st.error("Lütfen önce bir seçim yapınız!")
@@ -108,61 +81,43 @@ if mod == "seyirci":
 
     if kullanici_istegi:
         st.warning("LÜTFEN YEŞİL BUTONU BEKLEYİNİZ")
-        st.info(f"Sıradaki isteğiniz: **{kullanici_istegi}**")
-
-    # Repertuar Listesi
-    repertuar = [f"Şarkı {i}" for i in range(1, 21)] # Burayı kendi listenizle güncelleyebilirsiniz
+    
+    repertuar = [f"Şarkı {i}" for i in range(1, 21)]
     st.session_state.secilen_sarki = st.radio("", repertuar, index=None, label_visibility="collapsed")
 
+# --- SANATÇI EKRANI ---
 else:
-    # SANATÇI EKRANI
     st_autorefresh(interval=3000, key="sanatci_refresh")
     st.markdown('<div class="istek-baslik">İSTEKLER</div>', unsafe_allow_html=True)
-    
-    # CSS: Satırları yan yana tutmaya zorla
-    st.markdown("""
-        <style>
-        /* Sütunların alt alta binmesini engelle */
-        [data-testid="column"] {
-            width: fit-content !important;
-            flex: unset !important;
-            min-width: 0px !important;
-        }
-        /* Şarkı satırını esnek yap (Yan yana diz) */
-        div.row-widget.stHorizontal {
-            flex-direction: row !important;
-            display: flex !important;
-            flex-wrap: nowrap !important;
-            align-items: center !important;
-        }
-        .sarki-metni {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 16px;
-            color: #FDE992;
-            margin-left: 10px;
-        }
-        </style>
-        """, unsafe_allow_html=True)
     
     data = veri_yukle()
     
     for idx, item in enumerate(data["istekler"]):
-        # gap='small' ile aradaki boşluğu daraltıyoruz
-        col1, col2 = st.columns([1, 4], gap="small") 
+        # Şarkı ismini bir div içinde gösteriyoruz. 
+        # Çift tıklandığında (ondblclick) Streamlit'in butonuna basılmış gibi davranacak.
+        st.markdown(f'''
+            <div class="sarki-satiri" 
+                 id="sarki_{idx}" 
+                 ondblclick="document.getElementById('hidden_btn_{idx}').click();">
+                {item["sarki"]}
+            </div>
+        ''', unsafe_allow_html=True)
         
-        with col1:
-            if st.button("SİL", key=f"del_{idx}"):
-                u_id = item['id']
-                data["istekler"].pop(idx)
-                if u_id in data["aktif_kullanicilar"]:
-                    del data["aktif_kullanicilar"][u_id]
-                veri_kaydet(data)
-                st.rerun()
-        
-        with col2:
-            # Markdown yerine doğrudan metin yazdırarak hizayı koruyalım
-            st.markdown(f'<div class="sarki-metni">{item["sarki"]}</div>', unsafe_allow_html=True)
+        # Gizli Buton: JavaScript bunu tetikleyecek
+        if st.button(f"Sil_{idx}", key=f"hidden_btn_{idx}", help="Görünmez silme butonu"):
+            u_id = item['id']
+            data["istekler"].pop(idx)
+            if u_id in data["aktif_kullanicilar"]:
+                del data["aktif_kullanicilar"][u_id]
+            veri_kaydet(data)
+            st.rerun()
+            
+        # Gizli butonu CSS ile tamamen saklıyoruz
+        st.markdown(f"""
+            <style>
+            div[data-testid="stButton"] {{ display: none; }} 
+            /* Sadece sanatçı modunda butonları gizle */
+            </style>
+            """, unsafe_allow_html=True)
 
 
