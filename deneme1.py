@@ -17,7 +17,7 @@ def veri_kaydet(data):
 
 st.set_page_config(page_title="Sahne", layout="centered")
 
-# Veriyi en başta yüklüyoruz ki buton rengini belirleyebilelim
+# Oturum Kimliği
 if 'user_id' not in st.session_state:
     import uuid
     st.session_state.user_id = str(uuid.uuid4())
@@ -25,13 +25,18 @@ if 'user_id' not in st.session_state:
 data = veri_yukle()
 kullanici_istegi = data["aktif_kullanicilar"].get(st.session_state.user_id)
 
-# DURUMA GÖRE RENK BELİRLEME
-# İstek yoksa: Yeşil (#28a745), İstek varsa: Kırmızı (#dc3545)
-btn_color = "#dc3545" if kullanici_istegi else "#28a745"
-btn_text = "İSTEK GÖNDERİLDİ" if kullanici_istegi else "İSTEK GÖNDER"
+# DURUMA GÖRE RENK VE METİN BELİRLEME
+btn_color = "#dc3545" if kullanici_istegi else "#28a745" # Kırmızı : Yeşil
+btn_text = "İSTEK İLETİLDİ" if kullanici_istegi else "İSTEK GÖNDER"
 
 st.markdown(f"""
     <style>
+    /* Butonun üstten kesilmemesi için konteyner ayarı */
+    .block-container {{
+        padding-top: 3rem !important; 
+        padding-bottom: 0rem !important;
+    }}
+    
     .stButton>button {{
         width: 100%;
         background-color: {btn_color} !important;
@@ -41,7 +46,9 @@ st.markdown(f"""
         height: 60px;
         font-size: 22px;
         border-radius: 10px;
+        margin-top: 10px; /* Butonu biraz daha aşağı iter */
     }}
+    
     .istek-baslik {{
         background-color: #FDE992;
         color: black;
@@ -49,14 +56,7 @@ st.markdown(f"""
         font-weight: bold;
         padding: 10px;
         border: 2px solid #1d3311;
-        margin-bottom: 10px;
-    }}
-    /* Tarayıcı daraltma için ana konteyner boşluklarını sıfırlama */
-    .block-container {{
-        padding-top: 1rem !important;
-        padding-bottom: 0rem !important;
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
+        margin-bottom: 20px;
     }}
     </style>
     """, unsafe_allow_html=True)
@@ -66,6 +66,9 @@ mod = params.get("mod", "seyirci")
 
 # --- SEYİRCİ EKRANI ---
 if mod == "seyirci":
+    # Seyirci ekranı da 5 saniyede bir kontrol etsin ki buton yeşile dönebilsin
+    st_autorefresh(interval=5000, key="seyirci_refresh")
+    
     if st.button(btn_text, disabled=(kullanici_istegi is not None)):
         if "secilen_sarki" not in st.session_state or st.session_state.secilen_sarki is None:
             st.error("Lütfen önce bir seçim yapınız!")
@@ -77,13 +80,10 @@ if mod == "seyirci":
 
     repertuar = [f"Şarkı {i}" for i in range(1, 21)]
     st.session_state.secilen_sarki = st.radio("", repertuar, index=None, label_visibility="collapsed")
-    
-    if kullanici_istegi:
-        st.info(f"İletildi: {kullanici_istegi}")
 
 # --- SANATÇI EKRANI ---
 else:
-    st_autorefresh(interval=3000, key="refresh")
+    st_autorefresh(interval=3000, key="sanatci_refresh")
     st.markdown('<div class="istek-baslik">İSTEKLER</div>', unsafe_allow_html=True)
     
     for idx, item in enumerate(data["istekler"]):
