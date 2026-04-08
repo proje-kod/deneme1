@@ -115,13 +115,43 @@ if mod == "seyirci":
     st.session_state.secilen_sarki = st.radio("", repertuar, index=None, label_visibility="collapsed")
 
 else:
+else:
     # SANATÇI EKRANI
     st_autorefresh(interval=3000, key="sanatci_refresh")
     st.markdown('<div class="istek-baslik">İSTEKLER</div>', unsafe_allow_html=True)
     
-    # İstekleri listele
+    # CSS: Satırları yan yana tutmaya zorla
+    st.markdown("""
+        <style>
+        /* Sütunların alt alta binmesini engelle */
+        [data-testid="column"] {
+            width: fit-content !important;
+            flex: unset !important;
+            min-width: 0px !important;
+        }
+        /* Şarkı satırını esnek yap (Yan yana diz) */
+        div.row-widget.stHorizontal {
+            flex-direction: row !important;
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            align-items: center !important;
+        }
+        .sarki-metni {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 16px;
+            color: #FDE992;
+            margin-left: 10px;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+    
+    data = veri_yukle()
+    
     for idx, item in enumerate(data["istekler"]):
-        col1, col2 = st.columns([1, 4]) # Buton ve Metin oranı
+        # gap='small' ile aradaki boşluğu daraltıyoruz
+        col1, col2 = st.columns([1, 4], gap="small") 
         
         with col1:
             if st.button("SİL", key=f"del_{idx}"):
@@ -133,6 +163,7 @@ else:
                 st.rerun()
         
         with col2:
+            # Markdown yerine doğrudan metin yazdırarak hizayı koruyalım
             st.markdown(f'<div class="sarki-metni">{item["sarki"]}</div>', unsafe_allow_html=True)
 
 
