@@ -93,15 +93,46 @@ else:
     st_autorefresh(interval=3000, key="sanatci_refresh")
     st.markdown('<div class="istek-baslik">İSTEKLER</div>', unsafe_allow_html=True)
     
+    # CSS ile metinlerin taşmasını engelliyoruz ve SİL butonunu özelleştiriyoruz
+    st.markdown("""
+        <style>
+        .sarki-metni {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: block;
+            font-size: 16px;
+            color: white;
+            padding-top: 5px;
+        }
+        /* SİL butonunu daha küçük ve kırmızı yapalım */
+        div[data-testid="column"] button {
+            background-color: #dc3545 !important;
+            color: white !important;
+            height: 35px !important;
+            font-size: 14px !important;
+            padding: 0px !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+    
+    data = veri_yukle()
+    
     for idx, item in enumerate(data["istekler"]):
-        col1, col2 = st.columns([4, 1.5])
-        col1.write(f"**{item['sarki']}**")
-        if col2.button("SİL", key=f"del_{idx}"):
+        # SİL butonunu sol başa (1. sütun) alıyoruz, şarkıyı sağa (2. sütun)
+        col1, col2 = st.columns([1.2, 4]) 
+        
+        # SİL Butonu (Sol Başta)
+        if col1.button("SİL", key=f"del_{idx}"):
             u_id = item['id']
             data["istekler"].pop(idx)
             if u_id in data["aktif_kullanicilar"]:
                 del data["aktif_kullanicilar"][u_id]
             veri_kaydet(data)
             st.rerun()
+            
+        # Şarkı Adı (Sağda ve Kesilebilir)
+        # HTML 'ellipsis' sayesinde uzun isimler 'Akşam oldu hüzünlend...' şeklinde görünür
+        col2.markdown(f'<span class="sarki-metni">{item["sarki"]}</span>', unsafe_allow_html=True)
 
 
