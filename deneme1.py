@@ -36,7 +36,7 @@ st.markdown(f"""
     /* Sanatçı Listesi Yazı Tipi */
     .stCheckbox label p {{
         font-size: 18px !important;
-        color: #FDE992 !important;
+        color: 	#000000 !important;
         font-weight: bold;
     }}
     /* Onay kutusunu biraz büyütelim */
