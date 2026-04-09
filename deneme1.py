@@ -81,7 +81,7 @@ def repertuar_yukle():
         # Eğer dosya yoksa hata vermemesi için örnek bir liste döndürelim
         return ["Repertuar dosyası bulunamadı!"]
 
-repertuar = repertuar_yukle()
+    repertuar = repertuar_yukle()
     st.session_state.secilen_sarki = st.radio("", repertuar, index=None, label_visibility="collapsed")
 
 # --- SANATÇI EKRANI ---
