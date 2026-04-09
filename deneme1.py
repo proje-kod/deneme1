@@ -71,7 +71,17 @@ if mod == "seyirci":
     if kullanici_istegi:
         st.warning(f"YEŞİL BUTONU BEKLEYİNİZ\n\nGönderdiğiniz: {kullanici_istegi}")
     
-    repertuar = [f"Şarkı {i}" for i in range(1, 21)]
+    # --- REPERTUAR YÜKLEME ---
+def repertuar_yukle():
+    if os.path.exists("denemelistesi.txt"):
+        with open("denemelistesi.txt", "r", encoding="utf-8") as f:
+            # Boş satırları temizleyerek listeye alıyoruz
+            return [line.strip() for line in f.readlines() if line.strip()]
+    else:
+        # Eğer dosya yoksa hata vermemesi için örnek bir liste döndürelim
+        return ["Repertuar dosyası bulunamadı!"]
+
+repertuar = repertuar_yukle()
     st.session_state.secilen_sarki = st.radio("", repertuar, index=None, label_visibility="collapsed")
 
 # --- SANATÇI EKRANI ---
