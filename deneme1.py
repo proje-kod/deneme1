@@ -55,7 +55,7 @@ if mod == "seyirci":
     
     # Buton Renk Ayarı
     btn_color = "#dc3545" if kullanici_istegi else "#28a745"
-    btn_text = "İSTEK İLETİLDİ" if kullanici_istegi else "İSTEK GÖNDER"
+    btn_text = "İSTEK GÖNDERİLDİ" if kullanici_istegi else "İSTEK GÖNDER"
     
     st.markdown(f"<style>.stButton>button {{ background-color: {btn_color} !important; color: white !important; width:100%; height:60px; font-size:22px; border-radius:10px; }}</style>", unsafe_allow_html=True)
 
@@ -69,7 +69,7 @@ if mod == "seyirci":
             st.rerun()
 
     if kullanici_istegi:
-        st.warning(f"LÜTFEN YEŞİL BUTONU BEKLEYİNİZ\n\nSıradaki: {kullanici_istegi}")
+        st.warning(f"YEŞİL BUTONU BEKLEYİNİZ\n\nSıradaki: {kullanici_istegi}")
     
     repertuar = [f"Şarkı {i}" for i in range(1, 21)]
     st.session_state.secilen_sarki = st.radio("", repertuar, index=None, label_visibility="collapsed")
