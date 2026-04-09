@@ -15,6 +15,14 @@ def veri_yukle():
 def veri_kaydet(data):
     with open(DB_FILE, "w", encoding="utf-8") as f: json.dump(data, f, ensure_ascii=False)
 
+# --- REPERTUAR YÜKLEME FONKSİYONU ---
+def repertuar_yukle():
+    if os.path.exists("denemelistesi.txt"):
+        with open("denemelistesi.txt", "r", encoding="utf-8") as f:
+            return [line.strip() for line in f.readlines() if line.strip()]
+    else:
+        return ["Repertuar dosyası bulunamadı!"]
+
 # --- SAYFA AYARLARI ---
 st.set_page_config(page_title="Sahne İstek", layout="centered")
 
@@ -36,10 +44,9 @@ st.markdown(f"""
     /* Sanatçı Listesi Yazı Tipi */
     .stCheckbox label p {{
         font-size: 18px !important;
-        color: 	#000000 !important;
+        color: #000000 !important;
         font-weight: bold;
     }}
-    /* Onay kutusunu biraz büyütelim */
     .stCheckbox div[data-testid="stMarkdownContainer"] {{
         margin-top: -2px;
     }}
@@ -71,29 +78,18 @@ if mod == "seyirci":
     if kullanici_istegi:
         st.warning(f"YEŞİL BUTONU BEKLEYİNİZ\n\nGönderdiğiniz: {kullanici_istegi}")
     
-    # --- REPERTUAR YÜKLEME ---
-def repertuar_yukle():
-    if os.path.exists("denemelistesi.txt"):
-        with open("denemelistesi.txt", "r", encoding="utf-8") as f:
-            # Boş satırları temizleyerek listeye alıyoruz
-            return [line.strip() for line in f.readlines() if line.strip()]
-    else:
-        # Eğer dosya yoksa hata vermemesi için örnek bir liste döndürelim
-        return ["Repertuar dosyası bulunamadı!"]
-
+    # Repertuarı dosyadan yükleyip ekrana basıyoruz
     repertuar = repertuar_yukle()
     st.session_state.secilen_sarki = st.radio("", repertuar, index=None, label_visibility="collapsed")
 
-    # --- SANATÇI EKRANI ---
-    else:
+# --- SANATÇI EKRANI ---
+else:
     st_autorefresh(interval=3000, key="sanatci_refresh")
     st.markdown('<div class="istek-baslik">İSTEKLER</div>', unsafe_allow_html=True)
     
     data = veri_yukle()
     
-    # İstekleri işaretleme kutusu (checkbox) olarak gösteriyoruz
     for idx, item in enumerate(data["istekler"]):
-        # Checkbox işaretlendiği anda (True olduğunda) silme işlemi tetiklenir
         if st.checkbox(f"{item['sarki']}", key=f"check_{idx}"):
             u_id = item['id']
             data["istekler"].pop(idx)
@@ -101,5 +97,4 @@ def repertuar_yukle():
                 del data["aktif_kullanicilar"][u_id]
             veri_kaydet(data)
             st.rerun()
-
 
