@@ -69,7 +69,7 @@ if mod == "seyirci":
             st.rerun()
 
     if kullanici_istegi:
-        st.warning(f"YEŞİL BUTONU BEKLEYİNİZ\n\nSıradaki: {kullanici_istegi}")
+        st.warning(f"YEŞİL BUTONU BEKLEYİNİZ\n\nGönderdiğiniz: {kullanici_istegi}")
     
     repertuar = [f"Şarkı {i}" for i in range(1, 21)]
     st.session_state.secilen_sarki = st.radio("", repertuar, index=None, label_visibility="collapsed")
