@@ -84,7 +84,7 @@ def repertuar_yukle():
     repertuar = repertuar_yukle()
     st.session_state.secilen_sarki = st.radio("", repertuar, index=None, label_visibility="collapsed")
 
-# --- SANATÇI EKRANI ---
+    # --- SANATÇI EKRANI ---
     else:
     st_autorefresh(interval=3000, key="sanatci_refresh")
     st.markdown('<div class="istek-baslik">İSTEKLER</div>', unsafe_allow_html=True)
